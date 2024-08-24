@@ -1,0 +1,69 @@
+extern array_idx_1      ;; int array_idx_1
+
+section .text
+    global inorder_parc
+
+;   struct node {
+;       int value;
+;       struct node *left;
+;       struct node *right;
+;   } __attribute__((packed));
+struc node
+    .value: resd 1        ; int value
+    .left: resd 1         ; struct node* left
+    .right: resd 1         ; struct node* right
+endstruc
+
+;;  inorder_parc(struct node *node, int *array);
+;       functia va parcurge in inordine arborele binar de cautare, salvand
+;       valorile nodurilor in vectorul array.
+;    @params:
+;        node  -> nodul actual din arborele de cautare;
+;        array -> adresa vectorului unde se vor salva valorile din noduri;
+
+; ATENTIE: vectorul array este INDEXAT DE LA 0!
+;          Cititi SI fisierul README.md din cadrul directorului pentru exemple,
+;          explicatii mai detaliate!
+; HINT: folositi variabila importata array_idx_1 pentru a retine pozitia
+;       urmatorului element ce va fi salvat in vectorul array.
+;       Este garantat ca aceasta variabila va fi setata pe 0 la fiecare
+;       test.
+
+inorder_parc:
+    enter 0, 0
+    pusha
+    mov eax, [ebp + 8] ;nodul curent
+
+    cmp eax, dword 0 ; Verific dacă este NULL
+    je end_inorder_parc
+
+    ; Parcurg stânga
+    mov eax, [ebp + 8]
+    mov eax, [eax + node.left] ; nodul din stanga
+    push dword [ebp + 12]
+    push eax
+    call inorder_parc
+    add esp, 8
+
+    ; mut valoarea in vector
+    mov eax, [ebp + 8]
+    mov eax, [eax + node.value] ; câmpul "value"
+    mov ebx, [ebp + 12]
+    mov ecx, dword [array_idx_1]
+    mov [ebx + 4 * ecx], eax
+
+    inc dword [array_idx_1]
+
+    ; Parcurg dreapta
+    mov eax, [ebp + 8]
+    mov eax, [eax + node.right] ; nodul din dreapta
+    push dword [ebp + 12]
+    push eax
+    call inorder_parc
+    add esp, 8
+
+end_inorder_parc:
+
+    popa
+    leave
+    ret
